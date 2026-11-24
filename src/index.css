@@ -1,0 +1,43 @@
+@import "tailwindcss";
+@import "@fontsource/anton/400.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+
+@layer base {
+  :root {
+    --font-display: "Anton", Impact, sans-serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --ease-vault: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+}
+
+.font-anton {
+  font-family: var(--font-display);
+}
+
+.font-inter {
+  font-family: var(--font-sans);
+}
+
+.vault-transition {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 650ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vault-transition,
+  .carousel-item-transition,
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

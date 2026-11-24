@@ -1,0 +1,6 @@
+{
+  "name": "Guardian Vault",
+  "description": "Cross-platform encrypted personal vault for saving website links, GitHub repositories, markdown notes, and hackathons.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

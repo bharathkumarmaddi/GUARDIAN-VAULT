@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-singlefile/
+dev-dist/
+release/
+release-android/
+.aistudio/
+github-config-bundle.txt

@@ -1,0 +1,124 @@
+name: Release Guardian Vault
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: Verify & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund --legacy-peer-deps
+      - run: npm test
+      - run: npm run build
+        env:
+          VITE_GITHUB_REPO: ${{ github.repository }}
+
+  desktop:
+    name: Build ${{ matrix.os_name }}
+    needs: [verify]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os_name: Windows
+            runner: windows-latest
+            flag: win
+            artifact: desktop-win
+          - os_name: macOS
+            runner: macos-latest
+            flag: mac
+            artifact: desktop-mac
+          - os_name: Linux
+            runner: ubuntu-latest
+            flag: linux
+            artifact: desktop-linux
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund --legacy-peer-deps
+      - run: npm run build
+        env:
+          VITE_GITHUB_REPO: ${{ github.repository }}
+      - run: npx electron-builder --${{ matrix.flag }} --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.AppImage
+            release/*.deb
+          if-no-files-found: warn
+
+  android:
+    name: Build Android APK
+    needs: [verify]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install dependencies
+        run: |
+          npm install --no-audit --no-fund --legacy-peer-deps
+          if [ ! -d "node_modules/@capacitor/android" ]; then
+            npm install @capacitor/core @capacitor/android --no-audit --no-fund --legacy-peer-deps
+            npm install -D @capacitor/cli --no-audit --no-fund --legacy-peer-deps
+          fi
+      - name: Build web app & sync Android
+        run: |
+          npm run build
+          if [ ! -d "android" ]; then
+            npx cap add android
+          else
+            npx cap sync android
+          fi
+        env:
+          VITE_GITHUB_REPO: ${{ github.repository }}
+      - name: Build Android APK
+        run: |
+          mkdir -p release-android
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../release-android/Guardian-Vault-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: release-android/Guardian-Vault-Android.apk
+          if-no-files-found: error
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: [verify, desktop, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+      - name: List built assets
+        run: ls -la release-assets
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
