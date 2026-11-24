@@ -1,0 +1,114 @@
+{
+  "name": "guardian-vault",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Cross-platform encrypted personal vault for website links, GitHub repositories, notes, and hackathons.",
+  "type": "module",
+  "main": "electron.cjs",
+  "scripts": {
+    "dev": "vite --port=3000 --host=0.0.0.0",
+    "build": "vite build",
+    "build:singlefile": "vite build --mode singlefile --outDir dist-singlefile",
+    "electron:start": "npm run build && electron .",
+    "electron:build:win": "npm run build && electron-builder --win",
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:linux": "npm run build && electron-builder --linux",
+    "electron:dev": "VITE_TARGET=electron vite build && electron .",
+    "dist:win": "VITE_TARGET=electron vite build && electron-builder --win nsis portable",
+    "dist:linux": "VITE_TARGET=electron vite build && electron-builder --linux AppImage deb",
+    "dist:mac": "VITE_TARGET=electron vite build && electron-builder --mac dmg",
+    "android:build": "VITE_TARGET=android vite build && npx cap sync android",
+    "dist": "VITE_TARGET=electron vite build && electron-builder",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "clean": "rm -rf dist dist-singlefile release",
+    "lint": "tsc --noEmit"
+  },
+  "build": {
+    "appId": "com.guardianvault.app",
+    "productName": "Guardian Vault",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron.cjs",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "icon": "public/pwa-512x512.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Guardian-Vault-Windows-Setup.exe"
+    },
+    "portable": {
+      "artifactName": "Guardian-Vault-Windows-Portable.exe"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "identity": null,
+      "icon": "public/pwa-512x512.png",
+      "artifactName": "Guardian-Vault-macOS.dmg"
+    },
+    "dmg": {
+      "artifactName": "Guardian-Vault-macOS.dmg"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "public/pwa-512x512.png"
+    },
+    "appImage": {
+      "artifactName": "Guardian-Vault-Linux.AppImage"
+    },
+    "deb": {
+      "artifactName": "Guardian-Vault-Linux.deb"
+    }
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.2",
+    "@fontsource/anton": "^5.3.0",
+    "@fontsource/inter": "^5.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "dexie": "^4.4.6",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "qrcode": "^1.5.4",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "vite": "^8.3.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
+    "@types/node": "^22.14.0",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.21",
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.0",
+    "fake-indexeddb": "^6.2.6",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2",
+    "vite-plugin-pwa": "^2.0.0",
+    "vite-plugin-singlefile": "^2.3.4",
+    "vitest": "^5.0.5"
+  }
+}
